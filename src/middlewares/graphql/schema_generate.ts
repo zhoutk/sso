@@ -62,12 +62,12 @@ async function getInfoFromSql() {
             if (col['COLUMN_NAME'].endsWith('_id')) {
                 typeDefObj[table].unshift(`"""关联的实体"""
                     ${G.L.trimEnd(col['COLUMN_NAME'], '_id')}: ${G.tools.bigCamelCase(G.L.trimEnd(col['COLUMN_NAME'], '_id'))}`)
-                resolvers[G.tools.bigCamelCase(table)] = {
-                    [G.L.trimEnd(col['COLUMN_NAME'], '_id')]: async (element, args, ctx, info) => {
-                        let fields = G.tools.getRequestedFieldsFromResolveInfo(table, info.fieldNodes[0])
-                        let rs = await new BaseDao(G.L.trimEnd(col['COLUMN_NAME'], '_id')).retrieve({ id: element[col['COLUMN_NAME']] }, fields)
-                        return rs.data[0]
-                    }
+                if (!resolvers[G.tools.bigCamelCase(table)])
+                    resolvers[G.tools.bigCamelCase(table)] = {}
+                resolvers[G.tools.bigCamelCase(table)][G.L.trimEnd(col['COLUMN_NAME'], '_id')] = async (element, args, ctx, info) => {
+                    let fields = G.tools.getRequestedFieldsFromResolveInfo(table, info.fieldNodes[0])
+                    let rs = await new BaseDao(G.L.trimEnd(col['COLUMN_NAME'], '_id')).retrieve({ id: element[col['COLUMN_NAME']] }, fields)
+                    return rs.data[0]
                 }
 
                 let fTable = G.L.trimEnd(col['COLUMN_NAME'], '_id')
